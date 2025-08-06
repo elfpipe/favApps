@@ -82,7 +82,7 @@ public:
 
     void updateNodePositions(const QPointF &mouse) {
         for (NNode *n : nodes)
-            n->updateWithMouse(mouse, 100.0);
+            n->updateWithMouse(mouse, 50.0);
     }
 
 private:
@@ -116,6 +116,7 @@ int main(int argc, char **argv) {
     view->setWindowTitle("Calculator Nodes");
     view->resize(600, 800);
 
+#if 0
     // Placér vinduet på modsatte halvdel af hvor musen er
     QPoint cursorPos = QCursor::pos();
     QRect screenRect = QGuiApplication::primaryScreen()->availableGeometry();
@@ -126,10 +127,11 @@ int main(int argc, char **argv) {
     int winW = 600;
     int winH = 800;
 
-    int x = (cursorPos.x() < halfW) ? screenRect.right() - winW : screenRect.left();
-    int y = (cursorPos.y() < halfH) ? screenRect.bottom() - winH : screenRect.top();
+    int x = (cursorPos.x() > halfW) ? halfW - winW : halfW;
+    int y = halfH - winH/2;
 
     view->move(x, y);
+#endif
     view->show();
 
     return app.exec();
