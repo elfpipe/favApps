@@ -86,8 +86,8 @@ void CodeEditor::init()
 	buttonLayout->addWidget(loadButton);
 	buttonLayout->addWidget(saveAsButton);
 
-	QShortcut *shortcut = new QShortcut(QKeySequence(tr("Ctrl+S")), this);
-	connect(shortcut, SIGNAL(activated()), this, SLOT(saveFile()));
+	// QShortcut *shortcut = new QShortcut(QKeySequence(tr("Ctrl+S")), window);
+	// connect(shortcut, SIGNAL(activated()), this, SLOT(saveFile()));
 
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addLayout(buttonLayout);
@@ -132,6 +132,14 @@ CodeEditor::CodeEditor(char *filename, QWidget *parent)
 		return;
 	}
 	setPlainText(file.readAll());
+}
+
+void CodeEditor::keyPressEvent(QKeyEvent *event) {
+    if (event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_S) {
+        saveFile();
+        return; // Skip normal processing
+    }
+    QPlainTextEdit::keyPressEvent(event); // Default behavior
 }
 
 Highlighter::Highlighter(QTextDocument *parent)
@@ -268,6 +276,7 @@ void CodeEditor::saveAsFile()
 
 void CodeEditor::saveFile()
 {
+    printf("save %s\n", filename.toLocal8Bit().constData());
 	if(filename.size() == 0) {
 		saveAsFile();
 		return;

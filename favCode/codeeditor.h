@@ -104,7 +104,9 @@ protected:
     void resizeEvent(QResizeEvent *event);
 	void closeEvent(QCloseEvent *event);
     void insertFromMimeData(const QMimeData *source);
-    
+
+    void keyPressEvent(QKeyEvent *event) override;
+
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();

@@ -1,0 +1,62 @@
+; $VER: Install_Qt6_Minimal 2.0 (08.08.2025)
+; Copies clib4.library to LIBS: and adds an Assign for qt6-amiga: to S:User-Startup
+; Uses (expandpath) to ensure APPDIR is absolute.
+
+(set APPDIR "")
+
+; Determine app folder:
+;  - If clib4.library is in current dir, use current dir (expanded to absolute).
+;  - Otherwise, ask the user, then expand to absolute.
+(if (exists "clib4.library")
+  (set APPDIR (expandpath ""))  ; current directory -> absolute
+  (set APPDIR
+    (askdir
+      (prompt "Select the application folder (where clib4.library resides):")
+      (help "Pick the folder containing clib4.library. The path will be expanded to an absolute path.")
+      (default "Work:")
+    )
+  )
+)
+; Ensure absolute even if askdir returned something with assigns/relative parts
+(set APPDIR (expandpath APPDIR))
+
+; Verify clib4.library exists there
+(if (not (exists (tackon APPDIR "clib4.library")))
+  (abort "clib4.library was not found in the selected folder.")
+)
+
+; Copy clib4.library -> LIBS: (overwrite without asking for simplicity)
+(copyfiles
+  (source APPDIR)
+  (dest "LIBS:")
+  (pattern "clib4.library")
+  (prompt "Copy clib4.library to LIBS:?")
+  (help "Copies clib4.library into LIBS:. Overwrites without confirmation.")
+  (confirm)
+)
+
+(message "clib4.library installed in LIBS:.")
+
+; Ask to add persistent Assign in S:User-Startup (uses absolute APPDIR)
+(if (= 0 (askchoice
+      (prompt "Add 'Assign qt6-amiga:' to S:User-Startup for persistence?")
+      (help "Choose Yes to make the assign permanent across reboots.")
+      (choices "Yes" "No")
+      (default 0)
+   ))
+  (
+    (startup "Qt6 Assign"
+      (prompt "Adding Assign line to S:User-Startup.")
+      (help "This adds: Assign >NIL: qt6-amiga: \"<your app folder>\" at boot.")
+      (command "Assign >NIL: qt6-amiga: \"" APPDIR "\"\n")
+    )
+    (message "Assign line queued in S:User-Startup.")
+  )
+  (message "Skipped modifying S:User-Startup.")
+)
+
+; Also perform the Assign now for this session
+(run (cat "Assign >NIL: qt6-amiga: \"" APPDIR "\""))
+(message (cat "Assigned qt6-amiga: to " APPDIR))
+
+(message "Done. You can run your Qt6 apps now.")
